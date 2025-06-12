@@ -21,8 +21,11 @@ let replyingTo = null;
 
 // PeerJS Setup
 peer.on("open", id => {
-  alert(`Your Peer ID: ${id}`);
-  document.getElementById("peer-id-input").placeholder = `Your ID: ${id}`;
+  // Remove alert
+  // alert(`Your Peer ID: ${id}`);
+  showToast("Connected <i class='fas fa-check text-green-400 ml-1'></i>");
+  
+  document.getElementById("peer-id-input").placeholder = "Enter a peer ID"; // updated placeholder
   currentPeerId.textContent = `ID: ${id}`;
   peerDetails[id] = {
     joined: new Date(),
@@ -32,6 +35,14 @@ peer.on("open", id => {
     username: localUsername,
     avatar: localAvatar
   };
+
+  // Auto-connect if URL param exists
+  const urlParams = new URLSearchParams(window.location.search);
+  const remoteId = urlParams.get('id');
+  if (remoteId) {
+    const conn = peer.connect(remoteId);
+    setupConnection(conn);
+  }
 });
 
 peer.on("connection", conn => {
@@ -329,6 +340,25 @@ copyPeerIdBtn.addEventListener("click", () => {
     setTimeout(() => notification.remove(), 2000);
   }).catch(err => console.error("Failed to copy: ", err));
 });
+
+document.getElementById("copy-invite-btn").onclick = () => {
+  const id = peer.id;
+  if (id) {
+    const url = `${window.location.origin}?id=${id}`;
+    navigator.clipboard.writeText(url);
+    showToast("Invite link copied <i class='fas fa-link text-blue-400 ml-1'></i>");
+  }
+};
+
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.innerHTML = message;
+  toast.className = "fixed bottom-4 right-4 bg-[#2b2d31] text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in";
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
 
 // Mobile Sidebar Toggle
 const mobileMenuBtn = document.getElementById("mobile-menu-btn");
