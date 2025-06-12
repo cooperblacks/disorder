@@ -6,6 +6,12 @@ const fileInput = document.getElementById("file-input");
 const plusFileInput = document.getElementById("plus-file-input");
 const sendBtn = document.getElementById("send-btn");
 const peerList = document.getElementById("peer-list");
+const peerCount = document.getElementById("peer-count");
+const replyPreview = document.getElementById("reply-preview");
+const emojiBtn = document.getElementById("emoji-btn");
+const emojiPicker = document.getElementById("emoji-picker");
+const currentPeerId = document.getElementById("current-peer-id");
+const copyPeerIdBtn = document.getElementById("copy-peer-id");
 
 // Local user data
 let localUsername = `Stranger #${Math.floor(1000 + Math.random() * 9000)}`;
@@ -17,6 +23,15 @@ let replyingTo = null;
 peer.on("open", id => {
   alert(`Your Peer ID: ${id}`);
   document.getElementById("peer-id-input").placeholder = `Your ID: ${id}`;
+  currentPeerId.textContent = `ID: ${id}`;
+  peerDetails[id] = {
+    joined: new Date(),
+    messages: 0,
+    files: 0,
+    active: true,
+    username: localUsername,
+    avatar: localAvatar
+  };
 });
 
 peer.on("connection", conn => {
@@ -37,15 +52,26 @@ function setupConnection(conn) {
     joined: new Date(),
     messages: 0,
     files: 0,
-    active: true
+    active: true,
+    username: conn.peer,
+    avatar: "https://via.placeholder.com/40"
   };
   updatePeerSidebar();
-  conn.on("open", () => appendSystemMessage(`Connected to ${conn.peer}`));
+  conn.on("open", () => {
+    appendSystemMessage(`Connected to ${conn.peer}`);
+    conn.send({ type: 'profile', username: localUsername, avatar: localAvatar });
+  });
   conn.on("data", data => {
-    displayMessage(data.username, data.message, data.avatar, data.fileType, data.fileData, data.fileName, conn.peer, data.replyTo);
-    peerDetails[conn.peer].messages++;
-    if (data.fileType) peerDetails[conn.peer].files++;
-    updatePeerSidebar();
+    if (data.type === 'profile') {
+      peerDetails[conn.peer].username = data.username;
+      peerDetails[conn.peer].avatar = data.avatar;
+      updatePeerSidebar();
+    } else {
+      displayMessage(data.username, data.message, data.avatar, data.fileType, data.fileData, data.fileName, conn.peer, data.replyTo);
+      peerDetails[conn.peer].messages++;
+      if (data.fileType) peerDetails[conn.peer].files++;
+      Sidebar();
+    }
   });
   conn.on("close", () => {
     appendSystemMessage(`Disconnected: ${conn.peer}`);
@@ -64,6 +90,7 @@ function sendMessage() {
   displayMessage(localUsername, msg, localAvatar, null, null, null, peer.id, replyingTo);
   messageInput.value = "";
   replyingTo = null;
+  replyPreview.classList.add("hidden");
   peerDetails[peer.id].messages++;
   updatePeerSidebar();
 }
@@ -123,19 +150,26 @@ function displayMessage(sender, message = '', avatar = '', fileType = '', fileDa
     reply.addEventListener("click", () => {
       replyingTo = replyTo;
       messageInput.focus();
+      updateReplyPreview();
     });
     content.appendChild(reply);
   }
 
-  // Message content
-  const messageDiv = document.createElement("div");
-  messageDiv.innerHTML = `
-    <div class="font-bold text-blue-400">${sender} <span class="text-xs text-gray-400 ml-2">${new Date().toLocaleTimeString()}</span></div>
-    <div class="text-white">${message}</div>
-  `;
+  // Message content wrapper
+  const messageWrapper = document.createElement("div");
+  messageWrapper.className = "flex flex-col";
 
-  // File preview
-  if (fileType && fileData) {
+  // Sender and timestamp
+  const header = document.createElement("div");
+  header.className = "flex items-center";
+  header.innerHTML = `<span class="font-bold text-blue-400">${sender}</span> <span class="text-xs text-gray-400 ml-2">${new Date().toLocaleTimeString()}</span>`;
+
+  // Message or file content
+  const body = document.createElement("div");
+  body.className = "text-white";
+  if (message) {
+    body.textContent = message;
+  } else if (fileType && fileData) {
     let el;
     if (fileType.startsWith("image/")) {
       el = document.createElement("img"); el.src = fileData; el.className = "w-64 rounded mt-2";
@@ -147,23 +181,27 @@ function displayMessage(sender, message = '', avatar = '', fileType = '', fileDa
       el = document.createElement("a"); el.href = fileData; el.download = fileName; el.textContent = `Download ${fileName}`;
       el.className = "text-yellow-300 underline mt-2";
     }
-    content.appendChild(el);
+    body.appendChild(el);
   }
+
+  messageWrapper.appendChild(header);
+  messageWrapper.appendChild(body);
+  content.appendChild(messageWrapper);
 
   // Hover overlay
   const hover = document.createElement("div");
   hover.className = "message-hover";
-  hover.innerHTML = '<i class="fas fa-reply text-blue-400 mr-2 cursor-pointer" title="Reply"></i>Reply';
+  hover.innerHTML = '<i class="fas fa-reply text-blue-400 mr-2 cursor-pointer"></i><span class="text-white">Reply</span>';
   hover.addEventListener("click", () => {
     const messageData = { sender, message, timestamp: new Date().toLocaleTimeString() };
     replyingTo = messageData;
     messageInput.focus();
+    updateReplyPreview();
   });
 
-  content.appendChild(messageDiv);
+  content.appendChild(hover);
   container.appendChild(img);
   container.appendChild(content);
-  container.appendChild(hover);
   chatBox.appendChild(container);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -188,6 +226,9 @@ function saveProfile() {
   if (newName) {
     localUsername = newName;
     document.getElementById("nickname-display").textContent = newName;
+    broadcast({ type: 'profile', username: localUsername, avatar: localAvatar });
+    peerDetails[peer.id].username = localUsername;
+    updatePeerSidebar();
   }
   const file = document.getElementById("avatar-upload").files[0];
   if (file && file.type.startsWith("image/")) {
@@ -195,6 +236,9 @@ function saveProfile() {
     reader.onload = () => {
       localAvatar = reader.result;
       document.getElementById("avatar-preview").src = localAvatar;
+      broadcast({ type: 'profile', username: localUsername, avatar: localAvatar });
+      peerDetails[peer.id].avatar = localAvatar;
+      updatePeerSidebar();
     };
     reader.readAsDataURL(file);
   }
@@ -204,12 +248,15 @@ function saveProfile() {
 // Update peer sidebar
 function updatePeerSidebar() {
   peerList.innerHTML = '';
+  const activePeers = Object.values(peerDetails).filter(p => p.active).length;
+  peerCount.textContent = `Online - ${activePeers}`;
   Object.keys(peerDetails).forEach(peerId => {
     const peer = document.createElement("div");
-    peer.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded";
+    peer.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded cursor-pointer";
+    peer.dataset.peerId = peerId;
     peer.innerHTML = `
-      <img src="https://via.placeholder.com/20" class="w-5 h-5 rounded-full" />
-      <span>${peerId}</span>
+      <img src="${peerDetails[peerId].avatar || 'https://via.placeholder.com/20'}" class="w-5 h-5 rounded-full" />
+      <span class="text-white-500 ml-auto">${peerDetails[peerId].username || peerId}</span>
       <span class="text-xs text-gray-400 ml-auto">${peerDetails[peerId].active ? 'Online' : 'Offline'}</span>
     `;
     peerList.appendChild(peer);
@@ -217,8 +264,9 @@ function updatePeerSidebar() {
 }
 
 // Avatar click for details
-chatBox.addEventListener("click", (e) => {
-  const avatar = e.target.closest(".avatar");
+document.addEventListener("click", (e) => {
+  let avatar = e.target.closest(".avatar");
+  if (!avatar) avatar = e.target.closest("[data-peer-id]");
   if (avatar) {
     const peerId = avatar.dataset.peerId;
     if (peerDetails[peerId]) {
@@ -228,7 +276,7 @@ chatBox.addEventListener("click", (e) => {
       detailsDiv.style.left = `${e.pageX + 10}px`;
       detailsDiv.style.top = `${e.pageY - 50}px`;
       detailsDiv.innerHTML = `
-        <h3 class="text-sm font-bold">${peerId}</h3>
+        <h3 class="text-sm font-bold">${peerDetails[peerId].username || peerId}</h3>
         <p class="text-xs text-gray-400">Messages: ${peerDetails[peerId].messages}</p>
         <p class="text-xs text-gray-400">Files: ${peerDetails[peerId].files}</p>
         <p class="text-xs text-gray-400">Joined: ${joined}</p>
@@ -237,5 +285,47 @@ chatBox.addEventListener("click", (e) => {
       document.body.appendChild(detailsDiv);
       setTimeout(() => detailsDiv.remove(), 5000); // Auto-remove after 5 seconds
     }
+  } else {
+    document.querySelectorAll(".user-details").forEach(el => el.remove());
   }
+});
+
+// Update reply preview
+function updateReplyPreview() {
+  if (replyingTo) {
+    replyPreview.textContent = `Replying to ${replyingTo.sender}: ${replyingTo.message.slice(0, 30)}${replyingTo.message.length > 30 ? '...' : ''}`;
+    replyPreview.classList.remove("hidden");
+  } else {
+    replyPreview.classList.add("hidden");
+  }
+}
+
+// Emoji picker functionality
+emojiBtn.addEventListener("click", () => {
+  emojiPicker.style.display = emojiPicker.style.display === "block" ? "none" : "block";
+  if (emojiPicker.style.display === "block") {
+    emojiPicker.innerHTML = `
+      <span class="cursor-pointer" onclick="addEmoji('😊')">😊</span>
+      <span class="cursor-pointer" onclick="addEmoji('👍')">👍</span>
+      <span class="cursor-pointer" onclick="addEmoji('❤️')">❤️</span>
+      <span class="cursor-pointer" onclick="addEmoji('😂')">😂</span>
+    `;
+  }
+});
+
+function addEmoji(emoji) {
+  messageInput.value += emoji;
+  emojiPicker.style.display = "none";
+}
+
+// Copy peer ID
+copyPeerIdBtn.addEventListener("click", () => {
+  const peerId = peer.id;
+  navigator.clipboard.writeText(peerId).then(() => {
+    const notification = document.createElement("div");
+    notification.className = "fixed bottom-5 right-5 bg-green-500 text-white p-2 rounded";
+    notification.textContent = "Peer ID copied!";
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
 });
