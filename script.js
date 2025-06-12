@@ -375,7 +375,6 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-
 // Mobile Sidebar Toggle
 const mobileMenuBtn = document.getElementById("mobile-menu-btn");
 const mobileSidebar = document.getElementById("mobile-sidebar");
