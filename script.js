@@ -258,19 +258,35 @@ function saveProfile() {
 
 // Update peer sidebar
 function updatePeerSidebar() {
+  // Clear both peer lists
   peerList.innerHTML = '';
+  mobilePeerList.innerHTML = '';
+
   const activePeers = Object.values(peerDetails).filter(p => p.active).length;
   peerCount.textContent = `Online - ${activePeers}`;
+  mobilePeerCount.textContent = activePeers;
+
   Object.keys(peerDetails).forEach(peerId => {
-    const peer = document.createElement("div");
-    peer.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded cursor-pointer";
-    peer.dataset.peerId = peerId;
-    peer.innerHTML = `
-      <img src="${peerDetails[peerId].avatar || 'https://via.placeholder.com/20'}" class="w-5 h-5 rounded-full" />
-      <span class="text-white-500 ml-auto">${peerDetails[peerId].username || peerId}</span>
-      <span class="text-xs text-gray-400 ml-auto">${peerDetails[peerId].active ? 'Online' : 'Offline'}</span>
+    const p = peerDetails[peerId];
+
+    // Desktop peer list
+    const desktopDiv = document.createElement("div");
+    desktopDiv.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded cursor-pointer";
+    desktopDiv.dataset.peerId = peerId;
+    desktopDiv.innerHTML = `
+      <img src="${p.avatar || 'https://via.placeholder.com/20'}" class="w-5 h-5 rounded-full" />
+      <span class="text-white-500 ml-auto">${p.username || peerId}</span>
+      <span class="text-xs text-gray-400 ml-auto">${p.active ? 'Online' : 'Offline'}</span>
     `;
-    peerList.appendChild(peer);
+    peerList.appendChild(desktopDiv);
+
+    // Mobile peer list (only active)
+    if (p.active) {
+      const mobileDiv = document.createElement("div");
+      mobileDiv.className = "flex items-center gap-2";
+      mobileDiv.innerHTML = `<img src="${p.avatar}" class="w-6 h-6 rounded-full" /> <span>${p.username}</span>`;
+      mobilePeerList.appendChild(mobileDiv);
+    }
   });
 }
 
@@ -375,19 +391,3 @@ closeSidebar.onclick = () => {
 
 const mobilePeerList = document.getElementById("mobile-peer-list");
 const mobilePeerCount = document.getElementById("mobile-peer-count");
-
-function updatePeerSidebar() {
-  // Existing logic...
-
-  // Mobile
-  mobilePeerList.innerHTML = '';
-  mobilePeerCount.textContent = activePeers;
-  Object.keys(peerDetails).forEach(peerId => {
-    const peer = peerDetails[peerId];
-    if (!peer.active) return;
-    const div = document.createElement("div");
-    div.className = "flex items-center gap-2";
-    div.innerHTML = `<img src="${peer.avatar}" class="w-6 h-6 rounded-full" /> <span>${peer.username}</span>`;
-    mobilePeerList.appendChild(div);
-  });
-}
