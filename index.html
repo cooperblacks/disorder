@@ -40,8 +40,8 @@
 <body class="flex h-screen overflow-hidden font-sans">
 
   <!-- Left Server Rail -->
-  <aside class="w-14 bg-[#1e1f22] flex flex-col items-center py-3 space-y-3">
-    <!-- Same server icons -->
+<aside class="hidden md:flex w-14 bg-[#1e1f22] flex-col items-center py-3 space-y-3">
+  <!-- Server icons -->
     <a href="https://discord.com/users/878686862116528249" target="_blank" title="Cooper B.">
       <img src="https://cdn.discordapp.com/avatars/878686862116528249/6f31431aebb6c04564896cc2c10ac93b.png?size=240"
            class="w-12 h-12 rounded-full hover:rounded-2xl transition-all hover:ring-2 ring-blue-500" />
@@ -57,7 +57,7 @@
   </aside>
 
   <!-- Channel List -->
-  <aside class="w-60 bg-[#2b2d31] flex flex-col text-sm text-[#b5bac1]">
+  <aside class="hidden md:flex w-60 bg-[#2b2d31] flex-col text-sm text-[#b5bac1]">
     <div class="p-3 font-semibold text-white border-b border-[#232428]">Exa Disorder</div>
     <div class="p-2 text-xs uppercase text-gray-400 tracking-widest">Text Channels</div>
     <div class="px-4 py-1 bg-[#404249] text-white rounded-md mx-2 mb-1"># general</div>
@@ -86,6 +86,14 @@
   <!-- Chat Section -->
   <div class="flex flex-col flex-1 bg-[#313338]">
     <!-- Topbar -->
+    <!-- Mobile Header -->
+<header class="flex md:hidden items-center justify-between h-12 px-4 bg-[#313338] border-b border-[#232428]">
+  <button id="mobile-menu-btn" class="text-white text-xl">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="text-white font-semibold"># general</div>
+</header>
+    <!-- Desktop Header-->
     <header class="h-12 flex items-center px-4 bg-[#313338] border-b border-[#232428] justify-between">
       <div class="text-white text-md font-semibold"># general</div>
       <div class="flex items-center gap-2">
@@ -113,8 +121,9 @@
     </div>
 
     <!-- Input Area -->
+    <div id="reply-preview" class="hidden bg-[#2b2d31] text-white text-sm px-4 py-2 border-l-4 border-blue-500 mx-4 mt-2 rounded">
+</div>
     <footer class="h-16 px-4 flex items-center bg-[#383a40] border-t border-[#232428] gap-3 relative">
-      <div id="reply-preview" class="hidden bg-[#2b2d31] text-white text-sm p-2 rounded mb-2 w-full"></div>
       <label for="plus-file-input" class="text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fas fa-plus-circle"></i></label>
       <input type="file" id="plus-file-input" class="hidden" />
 
@@ -134,5 +143,29 @@
   </div>
 
   <script src="script.js"></script>
+  
+  <!-- Mobile Sidebar Modal -->
+<div id="mobile-sidebar" class="fixed inset-0 z-50 bg-[#2b2d31] text-white p-4 transform -translate-x-full transition-transform duration-300 md:hidden">
+  <button id="close-sidebar" class="mb-4 text-right text-white text-xl">
+    <i class="fas fa-times"></i>
+  </button>
+
+  <!-- Channel list -->
+  <div>
+    <div class="text-sm font-semibold mb-2">Exa Disorder</div>
+    <div class="text-xs uppercase text-gray-400 tracking-widest">Text Channels</div>
+    <div class="py-1 mb-1"># general</div>
+    <div class="py-1 text-gray-500"># random</div>
+    <div class="py-1 text-gray-500"># memes</div>
+  </div>
+
+  <hr class="my-4 border-gray-700"/>
+
+  <!-- Peer Sidebar (flattened for mobile) -->
+  <div>
+    <div class="text-xs uppercase tracking-widest">Online - <span id="mobile-peer-count">0</span></div>
+    <div id="mobile-peer-list" class="space-y-2 mt-2"></div>
+  </div>
+</div>
 </body>
 </html>
