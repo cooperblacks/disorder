@@ -21,7 +21,7 @@ let replyingTo = null;
 
 // PeerJS Setup
 peer.on("open", id => {
-  alert(`All messages and content will be gone when all members disconnect. Your peer ID will change if you refresh or leave the chat.`);
+  alert(`All messages and content will be gone when all members disconnect. Your peer ID will change if you refresh or leave the chat. EVERYTHING IS LOST WHEN YOU LEAVE.`);
   showToast("Connected <i class='fas fa-check text-green-400 ml-1'></i>");
   document.getElementById("peer-id-input").placeholder = "Enter a peer ID"; 
   currentPeerId.textContent = `ID: ${id}`;
@@ -174,8 +174,17 @@ function displayMessage(sender, message = '', avatar = '', fileType = '', fileDa
   // Message or file content
   const body = document.createElement("div");
   body.className = "text-white";
+
+  // Check for mentions
+  const mentionRegex = new RegExp(`@${localUsername}\\b`, 'gi');
+  const isMentioned = message.match(mentionRegex);
+  if (isMentioned) {
+    container.classList.add("mentioned"); // Add highlight class
+  }
+
   if (message) {
-    body.textContent = message;
+    // Highlight mentions in the message text
+    body.innerHTML = message.replace(mentionRegex, `<span class="bg-blue-600 text-white px-1 rounded">@${localUsername}</span>`);
   } else if (fileType && fileData) {
     let el;
     if (fileType.startsWith("image/")) {
@@ -320,30 +329,74 @@ function updatePeerSidebar() {
   });
 }
 
-// Avatar click for details
+// Avatar click for profile card
 document.addEventListener("click", (e) => {
+  // Remove any existing profile cards
+  document.querySelectorAll(".user-profile-card").forEach(el => el.remove());
+
   let avatar = e.target.closest(".avatar");
   if (!avatar) avatar = e.target.closest("[data-peer-id]");
   if (avatar) {
     const peerId = avatar.dataset.peerId;
     if (peerDetails[peerId]) {
       const joined = Math.floor((new Date() - peerDetails[peerId].joined) / 1000 / 60) + 'm ago';
-      const detailsDiv = document.createElement("div");
-      detailsDiv.className = "user-details";
-      detailsDiv.style.left = `${e.pageX + 10}px`;
-      detailsDiv.style.top = `${e.pageY - 50}px`;
-      detailsDiv.innerHTML = `
-        <h3 class="text-sm font-bold">${peerDetails[peerId].username || peerId}</h3>
-        <p class="text-xs text-gray-400">Messages: ${peerDetails[peerId].messages}</p>
-        <p class="text-xs text-gray-400">Files: ${peerDetails[peerId].files}</p>
-        <p class="text-xs text-gray-400">Joined: ${joined}</p>
-        <p class="text-xs text-gray-400">Status: ${peerDetails[peerId].active ? 'Connected' : 'Disconnected'}</p>
+      
+      // Create profile card
+      const profileCard = document.createElement("div");
+      profileCard.className = "user-profile-card fixed bg-[#2b2d31] text-white rounded-lg shadow-lg p-4 w-64 z-50 border border-gray-600";
+      
+      // Position the card near the click
+      const rect = avatar.getBoundingClientRect();
+      profileCard.style.left = `${rect.right + 10}px`;
+      profileCard.style.top = `${rect.top - 50}px`;
+
+      // Ensure the card stays within viewport bounds
+      const cardRect = profileCard.getBoundingClientRect();
+      if (cardRect.right > window.innerWidth) {
+        profileCard.style.left = `${rect.left - cardRect.width - 10}px`;
+      }
+      if (cardRect.top < 0) {
+        profileCard.style.top = `${rect.top + 10}px`;
+      }
+
+      // Profile card content
+      profileCard.innerHTML = `
+        <div class="flex items-center gap-3 mb-3">
+          <img src="${peerDetails[peerId].avatar || 'https://via.placeholder.com/40'}" class="w-12 h-12 rounded-full" />
+          <div>
+            <h3 class="text-lg font-bold">${peerDetails[peerId].username || peerId}</h3>
+            <p class="text-xs text-gray-400">ID: ${peerId}</p>
+          </div>
+        </div>
+        <hr class="border-gray-600 mb-3">
+        <p class="text-sm text-gray-300">Messages: ${peerDetails[peerId].messages}</p>
+        <p class="text-sm text-gray-300">Files: ${peerDetails[peerId].files}</p>
+        <p class="text-sm text-gray-300">Joined: ${joined}</p>
+        <p class="text-sm text-gray-300">Status: ${peerDetails[peerId].active ? 'Connected' : 'Disconnected'}</p>
+        <button class="mt-3 w-full bg-blue-500 hover:bg-blue-600 text-white py-1 rounded text-sm">Mention @</button>
       `;
-      document.body.appendChild(detailsDiv);
-      setTimeout(() => detailsDiv.remove(), 5000); // Auto-remove after 5 seconds
+
+      // Append to body
+      document.body.appendChild(profileCard);
+
+      // Handle "Mention @" button click
+      profileCard.querySelector("button").addEventListener("click", () => {
+        messageInput.value += `@${peerDetails[peerId].username} `;
+        messageInput.focus();
+        profileCard.remove();
+      });
+
+      // Close card when clicking outside
+      const closeCard = (event) => {
+        if (!profileCard.contains(event.target) && event.target !== avatar) {
+          profileCard.remove();
+          document.removeEventListener("click", closeCard);
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener("click", closeCard);
+      }, 0);
     }
-  } else {
-    document.querySelectorAll(".user-details").forEach(el => el.remove());
   }
 });
 
@@ -404,9 +457,12 @@ function showToast(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// Toggle emoji picker
 emojiBtn.addEventListener("click", () => {
   emojiPicker.classList.toggle("hidden");
 });
+
+// Insert emoji into input
 emojiPicker.addEventListener("emoji-click", event => {
   const emoji = event.detail.unicode;
   messageInput.value += emoji;
