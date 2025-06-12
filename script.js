@@ -256,6 +256,22 @@ function saveProfile() {
   document.getElementById("profile-panel").classList.add("hidden");
 }
 
+// Mobile Sidebar Toggle
+const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+const mobileSidebar = document.getElementById("mobile-sidebar");
+const closeSidebar = document.getElementById("close-sidebar");
+
+mobileMenuBtn.onclick = () => {
+  mobileSidebar.classList.remove("-translate-x-full");
+};
+
+closeSidebar.onclick = () => {
+  mobileSidebar.classList.add("-translate-x-full");
+};
+
+const mobilePeerList = document.getElementById("mobile-peer-list");
+const mobilePeerCount = document.getElementById("mobile-peer-count");
+
 // Update peer sidebar
 function updatePeerSidebar() {
   // Clear both peer lists
@@ -366,7 +382,6 @@ document.getElementById("copy-invite-btn").onclick = () => {
   }
 };
 
-
 function showToast(message) {
   const toast = document.createElement("div");
   toast.innerHTML = message;
@@ -374,19 +389,3 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
-
-// Mobile Sidebar Toggle
-const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-const mobileSidebar = document.getElementById("mobile-sidebar");
-const closeSidebar = document.getElementById("close-sidebar");
-
-mobileMenuBtn.onclick = () => {
-  mobileSidebar.classList.remove("-translate-x-full");
-};
-
-closeSidebar.onclick = () => {
-  mobileSidebar.classList.add("-translate-x-full");
-};
-
-const mobilePeerList = document.getElementById("mobile-peer-list");
-const mobilePeerCount = document.getElementById("mobile-peer-count");
