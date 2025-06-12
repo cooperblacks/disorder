@@ -16,6 +16,7 @@
 
   <!-- Left Server Rail -->
   <aside class="w-14 bg-[#1e1f22] flex flex-col items-center py-3 space-y-3">
+    <!-- Same server icons -->
     <a href="https://discord.com/users/878686862116528249" target="_blank" title="Cooper B.">
       <img src="https://cdn.discordapp.com/avatars/878686862116528249/6f31431aebb6c04564896cc2c10ac93b.png?size=240"
            class="w-12 h-12 rounded-full hover:rounded-2xl transition-all hover:ring-2 ring-blue-500" />
@@ -37,28 +38,34 @@
     <div class="px-4 py-1 bg-[#404249] text-white rounded-md mx-2 mb-1"># general</div>
     <div class="px-4 py-1 hover:bg-[#3c3f45] mx-2 rounded cursor-not-allowed"># random</div>
     <div class="px-4 py-1 hover:bg-[#3c3f45] mx-2 rounded cursor-not-allowed"># memes</div>
-    <div class="mt-auto p-3 flex items-center gap-2 border-t border-[#232428]">
-      <img src="https://avatars.githubusercontent.com/u/214378236?s=32&v=4"
-           class="w-8 h-8 rounded-full" />
+
+    <!-- User info -->
+    <div class="mt-auto p-3 flex items-center gap-2 border-t border-[#232428] cursor-pointer" onclick="toggleProfilePanel()">
+      <img id="avatar-preview" src="https://avatars.githubusercontent.com/u/214378236?s=32&v=4" class="w-8 h-8 rounded-full" />
       <div>
-        <div class="text-sm font-semibold text-white">Cooper B.</div>
+        <div id="nickname-display" class="text-sm font-semibold text-white">Stranger #XXXX</div>
         <div class="text-xs text-green-400">Online</div>
       </div>
+    </div>
+
+    <!-- Editable Profile Panel -->
+    <div id="profile-panel" class="hidden absolute left-60 bottom-20 w-64 bg-[#1e1f22] p-4 rounded-lg shadow-lg space-y-2 z-10">
+      <label class="text-xs text-gray-400">Display Name</label>
+      <input id="nickname-input" class="w-full p-2 rounded bg-[#2b2d31] text-white" />
+      <label class="text-xs text-gray-400">Avatar</label>
+      <input type="file" id="avatar-upload" accept="image/*" class="w-full" />
+      <button onclick="saveProfile()" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">Save</button>
     </div>
   </aside>
 
   <!-- Chat Section -->
   <div class="flex flex-col flex-1 bg-[#313338]">
-    
     <!-- Topbar -->
     <header class="h-12 flex items-center px-4 bg-[#313338] border-b border-[#232428] justify-between">
       <div class="text-white text-md font-semibold"># general</div>
       <div class="flex items-center gap-2">
-        <input id="peer-id-input"
-               class="text-sm bg-[#1e1f22] p-1 px-2 rounded-md placeholder:text-gray-400 text-white focus:ring-1 focus:ring-blue-500"
-               placeholder="Peer ID"/>
-        <button id="connect-btn"
-                class="bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 rounded text-white">Connect</button>
+        <input id="peer-id-input" class="text-sm bg-[#1e1f22] p-1 px-2 rounded-md placeholder:text-gray-400 text-white focus:ring-1 focus:ring-blue-500" placeholder="Peer ID"/>
+        <button id="connect-btn" class="bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 rounded text-white">Connect</button>
       </div>
     </header>
 
@@ -72,18 +79,21 @@
 
     <!-- Input Area -->
     <footer class="h-16 px-4 flex items-center bg-[#383a40] border-t border-[#232428] gap-3">
-      <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-plus-circle"></i></button>
-      <input id="message-input" placeholder="Message #general"
-             class="flex-1 bg-[#1e1f22] p-3 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400"/>
+      <label for="plus-file-input" class="text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fas fa-plus-circle"></i></label>
+      <input type="file" id="plus-file-input" class="hidden" />
+
+      <input id="message-input" placeholder="Message #general" class="flex-1 bg-[#1e1f22] p-3 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400" />
+
       <label for="file-input" class="cursor-pointer text-gray-400 hover:text-white text-xl"><i class="fas fa-paperclip"></i></label>
       <input type="file" id="file-input" class="hidden" />
+
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-gift"></i></button>
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-image"></i></button>
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-smile"></i></button>
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-gamepad"></i></button>
+
       <button id="send-btn" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-paper-plane"></i></button>
     </footer>
-
   </div>
 
   <script src="script.js"></script>
