@@ -329,3 +329,35 @@ copyPeerIdBtn.addEventListener("click", () => {
     setTimeout(() => notification.remove(), 2000);
   }).catch(err => console.error("Failed to copy: ", err));
 });
+
+// Mobile Sidebar Toggle
+const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+const mobileSidebar = document.getElementById("mobile-sidebar");
+const closeSidebar = document.getElementById("close-sidebar");
+
+mobileMenuBtn.onclick = () => {
+  mobileSidebar.classList.remove("-translate-x-full");
+};
+
+closeSidebar.onclick = () => {
+  mobileSidebar.classList.add("-translate-x-full");
+};
+
+const mobilePeerList = document.getElementById("mobile-peer-list");
+const mobilePeerCount = document.getElementById("mobile-peer-count");
+
+function updatePeerSidebar() {
+  // Existing logic...
+
+  // Mobile
+  mobilePeerList.innerHTML = '';
+  mobilePeerCount.textContent = activePeers;
+  Object.keys(peerDetails).forEach(peerId => {
+    const peer = peerDetails[peerId];
+    if (!peer.active) return;
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2";
+    div.innerHTML = `<img src="${peer.avatar}" class="w-6 h-6 rounded-full" /> <span>${peer.username}</span>`;
+    mobilePeerList.appendChild(div);
+  });
+}
