@@ -179,14 +179,64 @@ function displayMessage(sender, message = '', avatar = '', fileType = '', fileDa
   } else if (fileType && fileData) {
     let el;
     if (fileType.startsWith("image/")) {
-      el = document.createElement("img"); el.src = fileData; el.className = "w-64 rounded mt-2";
+      el = document.createElement("img");
+      el.src = fileData;
+      el.className = "w-64 rounded mt-2";
     } else if (fileType.startsWith("video/")) {
-      el = document.createElement("video"); el.src = fileData; el.controls = true; el.className = "w-64 mt-2";
+      el = document.createElement("video");
+      el.src = fileData;
+      el.controls = true;
+      el.className = "w-64 mt-2";
     } else if (fileType.startsWith("audio/")) {
-      el = document.createElement("audio"); el.src = fileData; el.controls = true; el.className = "mt-2";
+      el = document.createElement("audio");
+      el.src = fileData;
+      el.controls = true;
+      el.className = "mt-2";
     } else {
-      el = document.createElement("a"); el.href = fileData; el.download = fileName; el.textContent = `Download ${fileName}`;
-      el.className = "text-yellow-300 underline mt-2";
+      // Create Blob from data URL
+      const byteString = atob(fileData.split(',')[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ia], { type: fileType });
+      const blobUrl = URL.createObjectURL(blob);
+      const fileSizeKB = Math.round(blob.size / 1024);
+
+      // Create Discord-style embed
+      const embed = document.createElement("div");
+      embed.className = "bg-[#2b2d31] text-white p-3 rounded mt-2 max-w-xs border border-gray-600";
+
+      const fileTitle = document.createElement("div");
+      fileTitle.className = "font-semibold text-blue-400 break-all";
+      fileTitle.textContent = fileName;
+
+      const fileMeta = document.createElement("div");
+      fileMeta.className = "text-xs text-gray-400 mt-1";
+      fileMeta.textContent = `${fileType} • ${fileSizeKB} KB`;
+
+      const actionLink = document.createElement("a");
+      actionLink.href = blobUrl;
+      actionLink.className = "text-yellow-300 underline text-sm mt-2 inline-block";
+      const previewTypes = [
+        "application/pdf",
+        "text/plain",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ];
+      if (previewTypes.includes(fileType)) {
+        actionLink.textContent = "Open in new tab";
+        actionLink.target = "_blank";
+      } else {
+        actionLink.textContent = "Download";
+        actionLink.download = fileName;
+      }
+
+      embed.appendChild(fileTitle);
+      embed.appendChild(fileMeta);
+      embed.appendChild(actionLink);
+      el = embed;
     }
     body.appendChild(el);
   }
@@ -353,3 +403,12 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
+
+emojiBtn.addEventListener("click", () => {
+  emojiPicker.classList.toggle("hidden");
+});
+emojiPicker.addEventListener("emoji-click", event => {
+  const emoji = event.detail.unicode;
+  messageInput.value += emoji;
+  messageInput.focus();
+});
