@@ -11,9 +11,30 @@
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     .message-container:hover .message-hover { display: block; }
-    .message-hover { display: none; position: absolute; left: 0; top: -30px; background: #2b2d31; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-    .user-details { display: none; position: absolute; background: #2b2d31; padding: 10px; border-radius: 5px; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .message-hover { 
+      display: none; 
+      position: absolute; 
+      right: -80px; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      background: #2b2d31; 
+      padding: 8px 16px; 
+      border-radius: 4px; 
+      font-size: 14px; 
+      white-space: nowrap; 
+      color: #ffffff; /* High contrast text */
+    }
+    .user-details { 
+      display: none; 
+      position: absolute; 
+      background: #2b2d31; 
+      padding: 10px; 
+      border-radius: 5px; 
+      z-index: 10; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+    }
     .avatar:hover .user-details { display: block; }
+    .emoji-picker { display: none; position: absolute; bottom: 60px; right: 0; background: #2b2d31; padding: 10px; border-radius: 5px; }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans">
@@ -44,7 +65,7 @@
     <div class="px-4 py-1 hover:bg-[#3c3f45] mx-2 rounded cursor-not-allowed"># memes</div>
 
     <!-- User info -->
-    <div class="mt-auto p-3 flex items-center gap-2 border-t border-[#232428] cursor-pointer" onclick="toggleProfilePanel()">
+    <div class="mt-auto p-3 flex items-center gap-2 border-t border-[#232428] cursor-pointer hover:bg-[#3c3f45] rounded" onclick="toggleProfilePanel()">
       <img id="avatar-preview" src="https://avatars.githubusercontent.com/u/214378236?s=32&v=4" class="w-8 h-8 rounded-full" />
       <div>
         <div id="nickname-display" class="text-sm font-semibold text-white">Stranger #XXXX</div>
@@ -68,6 +89,8 @@
     <header class="h-12 flex items-center px-4 bg-[#313338] border-b border-[#232428] justify-between">
       <div class="text-white text-md font-semibold"># general</div>
       <div class="flex items-center gap-2">
+        <span id="current-peer-id" class="text-sm text-gray-400 mr-2"></span>
+        <button id="copy-peer-id" class="bg-blue-600 hover:bg-blue-700 text-sm px-2 py-1 rounded text-white">Copy ID</button>
         <input id="peer-id-input" class="text-sm bg-[#1e1f22] p-1 px-2 rounded-md placeholder:text-gray-400 text-white focus:ring-1 focus:ring-blue-500" placeholder="Peer ID"/>
         <button id="connect-btn" class="bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 rounded text-white">Connect</button>
       </div>
@@ -84,13 +107,14 @@
 
       <!-- Peer Sidebar -->
       <aside id="peer-sidebar" class="w-60 bg-[#2b2d31] p-3 overflow-y-auto scrollbar-hide">
-        <div class="text-xs uppercase text-gray-400 tracking-widest">Connected Peers</div>
+        <div id="peer-count" class="text-xs uppercase text-white tracking-widest">Online - 0</div>
         <div id="peer-list" class="mt-2 space-y-2"></div>
       </aside>
     </div>
 
     <!-- Input Area -->
-    <footer class="h-16 px-4 flex items-center bg-[#383a40] border-t border-[#232428] gap-3">
+    <footer class="h-16 px-4 flex items-center bg-[#383a40] border-t border-[#232428] gap-3 relative">
+      <div id="reply-preview" class="hidden bg-[#2b2d31] text-white text-sm p-2 rounded mb-2 w-full"></div>
       <label for="plus-file-input" class="text-gray-400 hover:text-white text-xl cursor-pointer"><i class="fas fa-plus-circle"></i></label>
       <input type="file" id="plus-file-input" class="hidden" />
 
@@ -101,7 +125,8 @@
 
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-gift"></i></button>
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-image"></i></button>
-      <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-smile"></i></button>
+      <button id="emoji-btn" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-smile"></i></button>
+      <div id="emoji-picker" class="emoji-picker"></div>
       <button class="text-gray-400 hover:text-white text-xl"><i class="fas fa-gamepad"></i></button>
 
       <button id="send-btn" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-paper-plane"></i></button>
