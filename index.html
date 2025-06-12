@@ -43,6 +43,40 @@
     }
     .avatar:hover .user-details { display: block; }
     .emoji-picker { display: none; position: absolute; bottom: 60px; right: 0; background: #2b2d31; padding: 10px; border-radius: 5px; }
+    .user-profile-card {
+  animation: slideIn 0.2s ease-out;
+  max-width: 300px;
+  backdrop-filter: blur(5px);
+}
+
+.user-profile-card img {
+  object-fit: cover;
+}
+
+.user-profile-card button {
+  transition: background-color 0.2s;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-container.mentioned {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3b82f6;
+  padding-left: 8px;
+}
+
+.message-container.mentioned .text-white {
+  color: #e5e7eb;
+}
   </style>
 </head>
 <body class="flex h-screen overflow-hidden font-sans">
