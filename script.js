@@ -21,11 +21,9 @@ let replyingTo = null;
 
 // PeerJS Setup
 peer.on("open", id => {
-  // Remove alert
-  // alert(`Your Peer ID: ${id}`);
+  alert(`All messages and content will be gone when all members disconnect. Your peer ID will change if you refresh or leave the chat.`);
   showToast("Connected <i class='fas fa-check text-green-400 ml-1'></i>");
-  
-  document.getElementById("peer-id-input").placeholder = "Enter a peer ID"; // updated placeholder
+  document.getElementById("peer-id-input").placeholder = "Enter a peer ID"; 
   currentPeerId.textContent = `ID: ${id}`;
   peerDetails[id] = {
     joined: new Date(),
@@ -35,8 +33,6 @@ peer.on("open", id => {
     username: localUsername,
     avatar: localAvatar
   };
-
-  // Auto-connect if URL param exists
   const urlParams = new URLSearchParams(window.location.search);
   const remoteId = urlParams.get('id');
   if (remoteId) {
@@ -256,53 +252,21 @@ function saveProfile() {
   document.getElementById("profile-panel").classList.add("hidden");
 }
 
-// Mobile Sidebar Toggle
-const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-const mobileSidebar = document.getElementById("mobile-sidebar");
-const closeSidebar = document.getElementById("close-sidebar");
-
-mobileMenuBtn.onclick = () => {
-  mobileSidebar.classList.remove("-translate-x-full");
-};
-
-closeSidebar.onclick = () => {
-  mobileSidebar.classList.add("-translate-x-full");
-};
-
-const mobilePeerList = document.getElementById("mobile-peer-list");
-const mobilePeerCount = document.getElementById("mobile-peer-count");
-
 // Update peer sidebar
 function updatePeerSidebar() {
-  // Clear both peer lists
   peerList.innerHTML = '';
-  mobilePeerList.innerHTML = '';
-
   const activePeers = Object.values(peerDetails).filter(p => p.active).length;
   peerCount.textContent = `Online - ${activePeers}`;
-  mobilePeerCount.textContent = activePeers;
-
   Object.keys(peerDetails).forEach(peerId => {
-    const p = peerDetails[peerId];
-
-    // Desktop peer list
-    const desktopDiv = document.createElement("div");
-    desktopDiv.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded cursor-pointer";
-    desktopDiv.dataset.peerId = peerId;
-    desktopDiv.innerHTML = `
-      <img src="${p.avatar || 'https://via.placeholder.com/20'}" class="w-5 h-5 rounded-full" />
-      <span class="text-white-500 ml-auto">${p.username || peerId}</span>
-      <span class="text-xs text-gray-400 ml-auto">${p.active ? 'Online' : 'Offline'}</span>
+    const peer = document.createElement("div");
+    peer.className = "flex items-center gap-2 p-1 hover:bg-[#3c3f45] rounded cursor-pointer";
+    peer.dataset.peerId = peerId;
+    peer.innerHTML = `
+      <img src="${peerDetails[peerId].avatar || 'https://via.placeholder.com/20'}" class="w-5 h-5 rounded-full" />
+      <span class="text-white-500 ml-auto">${peerDetails[peerId].username || peerId}</span>
+      <span class="text-xs text-gray-400 ml-auto">${peerDetails[peerId].active ? 'Online' : 'Offline'}</span>
     `;
-    peerList.appendChild(desktopDiv);
-
-    // Mobile peer list (only active)
-    if (p.active) {
-      const mobileDiv = document.createElement("div");
-      mobileDiv.className = "flex items-center gap-2";
-      mobileDiv.innerHTML = `<img src="${p.avatar}" class="w-6 h-6 rounded-full" /> <span>${p.username}</span>`;
-      mobilePeerList.appendChild(mobileDiv);
-    }
+    peerList.appendChild(peer);
   });
 }
 
@@ -385,7 +349,7 @@ document.getElementById("copy-invite-btn").onclick = () => {
 function showToast(message) {
   const toast = document.createElement("div");
   toast.innerHTML = message;
-  toast.className = "fixed bottom-4 right-4 bg-[#2b2d31] text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in";
+  toast.className = "fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in";
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
