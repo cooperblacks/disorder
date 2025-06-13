@@ -10,6 +10,14 @@ export function showToast(message) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+export function appendSystemMessage(msg) {
+  const div = document.createElement("div");
+  div.className = "text-center text-gray-400 text-sm";
+  div.textContent = msg;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 copyPeerIdBtn.addEventListener("click", () => {
   const peerId = peer.id;
   navigator.clipboard
