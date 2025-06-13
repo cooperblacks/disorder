@@ -24,5 +24,3 @@ window.joinVoiceChannel = () => {
     joinVoiceChannel()
   );
 };
-
-initializeEmojiPicker();
