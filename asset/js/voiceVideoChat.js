@@ -17,7 +17,17 @@ import {
   setMicEnabled,
 } from "./globals.js";
 
+function showError(message) {
+  const errorBox = document.getElementById("error-message");
+  const errorText = document.getElementById("error-text");
+  errorText.textContent = message;
+  errorBox.classList.remove("hidden");
+  setTimeout(() => errorBox.classList.add("hidden"), 5000);
+}
+
 export function joinVoiceChannel() {
+  document.getElementById("media-control-dock").classList.remove("hidden");
+  document.getElementById("voice-top-panel").classList.remove("hidden");
   navigator.mediaDevices
     .getUserMedia({ audio: true, video: false })
     .then((stream) => {
@@ -40,6 +50,7 @@ export function joinVoiceChannel() {
     })
     .catch((err) => {
       console.error("Failed to access microphone", err);
+      showError("Microphone access denied or failed.");
     });
 }
 
@@ -97,6 +108,7 @@ document.getElementById("toggle-cam").onclick = async () => {
         '<i class="fas fa-video"></i>';
     } catch (e) {
       console.error("Failed to access webcam:", e);
+      showError("Camera access denied or failed.");
     }
   } else {
     if (localVideoStream) {
@@ -121,22 +133,30 @@ document.getElementById("share-screen").onclick = async () => {
     };
   } catch (e) {
     console.error("Screen share cancelled or failed", e);
+    showError("Screen share denied or failed.");
   }
 };
 
-document.getElementById("leave-voice").onclick = () => {
-  if (localStream) localStream.getTracks().forEach((t) => t.stop());
-  if (localVideoStream) localVideoStream.getTracks().forEach((t) => t.stop());
-  if (localScreenStream) localScreenStream.getTracks().forEach((t) => t.stop());
-
-  Object.values(mediaConnections).forEach((call) => call.close());
+export function leaveVoiceChannel() {
+  for (let id in mediaConnections) {
+    mediaConnections[id].close();
+  }
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+  }
   setLocalStream(null);
+  setMicEnabled(true);
+  setVideoEnabled(false);
   setLocalVideoStream(null);
   setLocalScreenStream(null);
-  mediaConnections = {};
+
+  document.getElementById("media-control-dock").classList.add("hidden");
+  document.getElementById("voice-top-panel").classList.add("hidden");
 
   document.getElementById("voice-users").innerHTML = "";
-};
+}
+document.getElementById("leave-voice").onclick = leaveVoiceChannel;
+
 
 function replaceTracks(newVideoTrack) {
   Object.values(mediaConnections).forEach((call) => {
