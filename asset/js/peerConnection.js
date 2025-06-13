@@ -16,7 +16,7 @@ import { addUserToVoiceUI, removeUserFromVoiceUI } from "./voiceVideoChat.js";
 
 peer.on("open", (id) => {
   alert(
-    `All messages and content will be gone when all members disconnect. Your peer ID will change if you refresh or leave the chat. EVERYTHING IS LOST WHEN YOU LEAVE.`
+ `All messages and content will be gone when all members disconnect. Your peer ID will change if you refresh or leave the chat. EVERYTHING IS LOST WHEN YOU LEAVE.` 
   );
   showToast("Connected <i class='fas fa-check text-green-400 ml-1'></i>");
   document.getElementById("peer-id-input").placeholder = "Enter a peer ID";
@@ -63,7 +63,6 @@ export function initializeConnection(conn) {
   conn.on("open", () => {
     appendSystemMessage(`Connected to ${conn.peer}`);
     conn.send({ type: "profile", username: localUsername, avatar: localAvatar });
-
   });
   conn.on("close", () => {
     appendSystemMessage(`Disconnected: ${conn.peer}`);
