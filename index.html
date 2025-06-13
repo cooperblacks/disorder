@@ -176,24 +176,16 @@
 
     <!-- Connected Users in Voice -->
     <div id="voice-users" class="px-4 space-y-1 mt-2 text-sm text-gray-300"></div>
-    <!-- Media Controls -->
-<div class="flex gap-2 px-4 mt-4">
-  <button id="toggle-mic" class="bg-gray-700 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
-    <i class="fas fa-microphone"></i>
-  </button>
-  <button id="toggle-cam" class="bg-gray-700 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
-    <i class="fas fa-video"></i>
-  </button>
-  <button id="share-screen" class="bg-gray-700 text-white px-2 py-1 rounded text-sm hover:bg-gray-600">
-    <i class="fas fa-desktop"></i>
-  </button>
-  <button id="leave-voice" class="bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-500">
-    <i class="fas fa-phone-slash"></i>
-  </button>
+
+
+    <!-- Media Control Dock -->
+<div id="media-control-dock" class="fixed bottom-20 left-40 transform -translate-x-1/2 z-50 bg-[#2b2d31] px-4 py-2 rounded-xl shadow-lg flex gap-4 items-center text-white hidden">
+  <button id="toggle-mic" class="hover:text-red-500"><i class="fas fa-microphone"></i></button>
+  <button id="toggle-cam" class="hover:text-red-500"><i class="fas fa-video"></i></button>
+  <button id="share-screen" class="hover:text-yellow-400"><i class="fas fa-desktop"></i></button>
+  <button id="leave-voice" class="hover:text-red-500"><i class="fas fa-phone-slash"></i></button>
 </div>
 
-
-    
     <!-- User info -->
     <div class="mt-auto p-3 flex items-center gap-2 border-t border-[#232428] cursor-pointer hover:bg-[#3c3f45] rounded" onclick="toggleProfilePanel()">
       <img id="avatar-preview" src="https://avatars.githubusercontent.com/u/214378236?s=32&v=4" class="w-8 h-8 rounded-full" />
@@ -254,6 +246,10 @@
     <!-- Chat Window with Sidebar -->
     <div class="flex flex-1 overflow-hidden">
       <main id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide text-sm">
+        <div id="voice-top-panel" class="fixed w-full px-4 py-2 bg-[#2b2d31] border-b border-[#232428] flex items-center gap-4 hidden">
+  <span class="text-white font-semibold">Voice Channel Active</span>
+  <span id="video-status" class="text-sm text-gray-400"></span>
+</div>
         <div class="text-center text-white mt-20">
           <h2 class="text-2xl font-bold mb-2">Welcome to Disorder</h2>
           <p class="text-gray-400 text-sm">This is the beginning of this server.</p>
@@ -288,7 +284,11 @@
       <button id="send-btn" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-paper-plane"></i></button>
     </footer>
   </div>
-
+ 
   <script  type="module" src="/disorder/asset/js/main.js"></script>
+  <div id="error-message" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white py-2 px-4 rounded-lg shadow-lg flex items-center space-x-2 hidden z-50">
+  <i class="fas fa-exclamation-circle"></i>
+  <span id="error-text"></span>
+</div>
 </body>
 </html>
