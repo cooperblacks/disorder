@@ -8,6 +8,7 @@ import {
   messageInput,
   sendBtn,
   replyPreview,
+  replyingTo,
   setReplyingTo,
 } from "./globals.js";
 import { displayMessage, updatePeerSidebar } from "./uiUpdates.js";
@@ -39,30 +40,23 @@ export function setupConnection(conn) {
   });
 }
 
-function sendMessage() {
+// Send message
+export function sendMessage() {
   const msg = messageInput.value.trim();
   if (!msg) return;
-  const payload = { type: "text", message: msg, replyTo: replyingTo };
+  const payload = { type: 'text', message: msg, replyTo: replyingTo };
   broadcast(payload);
-  displayMessage(
-    localUsername,
-    msg,
-    localAvatar,
-    null,
-    null,
-    null,
-    peer.id,
-    replyingTo
-  );
+  displayMessage(localUsername, msg, localAvatar, null, null, null, peer.id, replyingTo);
   messageInput.value = "";
-  setReplyingTo(null);
+  replyingTo = null;
   replyPreview.classList.add("hidden");
   peerDetails[peer.id].messages++;
   updatePeerSidebar();
 }
 
 sendBtn.onclick = sendMessage;
-messageInput.addEventListener("keypress", (e) => e.key === "Enter" && sendMessage());
+messageInput.addEventListener("keypress", e => e.key === "Enter" && sendMessage());
+
 
 export function broadcast(data) {
   Object.values(connections).forEach((conn) => {
