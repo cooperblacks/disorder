@@ -2,6 +2,7 @@
 import {
   peer,
   connections,
+  mediaConnections,
   peerDetails,
   localUsername,
   localAvatar,
