@@ -1,12 +1,17 @@
 // /asset/js/emojiHandling.js
 import { emojiBtn, emojiPicker, messageInput } from "./globals.js";
 
-emojiBtn.addEventListener("click", () => {Add commentMore actions
-  emojiPicker.style.display =
-    emojiPicker.style.display === "block" ? "none" : "block";
-});
+export function initializeEmojiPicker() {
+  // Toggle emoji picker visibility
+  emojiBtn.addEventListener("click", () => {
+    emojiPicker.classList.toggle("hidden");
+  });
 
-window.addEmoji = function (emoji) {
-  messageInput.value += emoji;
-  emojiPicker.style.display = "none";
-};
+  // Handle emoji selection from the <emoji-picker> element
+  emojiPicker.addEventListener("emoji-click", (event) => {
+    const emoji = event.detail.unicode;
+    messageInput.value += emoji;
+    messageInput.focus();
+    emojiPicker.classList.add("hidden"); // Hide picker after selection
+  });
+}
