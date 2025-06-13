@@ -14,6 +14,7 @@ import {
   setLocalVideoStream,
   setLocalScreenStream,
   setVideoEnabled,
+  connections,
   setMicEnabled,
 } from "./globals.js";
 
