@@ -63,18 +63,7 @@ export function initializeConnection(conn) {
   conn.on("open", () => {
     appendSystemMessage(`Connected to ${conn.peer}`);
     conn.send({ type: "profile", username: localUsername, avatar: localAvatar });
-    if (localStream) {
-      const call = peer.call(conn.peer, localStream);
-      mediaConnections[conn.peer] = call;
-      call.on("stream", (remoteStream) => {
-        addUserToVoiceUI(
-          conn.peer,
-          peerDetails[conn.peer]?.username || "Unknown",
-          peerDetails[conn.peer]?.avatar || "https://via.placeholder.com/20"
-        );
-      });
-      call.on("close", () => removeUserFromVoiceUI(conn.peer));
-    }
+
   });
   conn.on("close", () => {
     appendSystemMessage(`Disconnected: ${conn.peer}`);
