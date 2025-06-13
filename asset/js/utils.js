@@ -1,5 +1,5 @@
 // /asset/js/utils.js
-import { peer, copyPeerIdBtn } from "./globals.js";
+import { peer, chatBox, copyPeerIdBtn } from "./globals.js";
 
 export function showToast(message) {
   const toast = document.createElement("div");
