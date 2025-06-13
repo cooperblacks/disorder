@@ -41,14 +41,14 @@ export function setupConnection(conn) {
 }
 
 // Send message
-export function sendMessage() {
+function sendMessage() {
   const msg = messageInput.value.trim();
   if (!msg) return;
   const payload = { type: 'text', message: msg, replyTo: replyingTo };
   broadcast(payload);
   displayMessage(localUsername, msg, localAvatar, null, null, null, peer.id, replyingTo);
   messageInput.value = "";
-  replyingTo = null;
+  setReplyingTo(null);   // replyingTo = null;
   replyPreview.classList.add("hidden");
   peerDetails[peer.id].messages++;
   updatePeerSidebar();
