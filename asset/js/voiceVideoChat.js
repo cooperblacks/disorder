@@ -56,21 +56,22 @@ export function joinVoiceChannel() {
 }
 
 peer.on("call", (call) => {
-  navigator.mediaDevices
-    .getUserMedia({ audio: true, video: false })
-    .then((stream) => {
-      setLocalStream(stream);
-      call.answer(stream);
-      mediaConnections[call.peer] = call;
-      call.on("stream", (remoteStream) => {
-        addUserToVoiceUI(
-          call.peer,
-          peerDetails[call.peer]?.username || "Unknown",
-          peerDetails[call.peer]?.avatar || "https://via.placeholder.com/20"
-        );
-      });
-      call.on("close", () => removeUserFromVoiceUI(call.peer));
+  if (localStream) {
+    // Only answer the call if the user is in the voice channel
+    call.answer(localStream);
+    mediaConnections[call.peer] = call;
+    call.on("stream", (remoteStream) => {
+      addUserToVoiceUI(
+        call.peer,
+        peerDetails[call.peer]?.username || "Unknown",
+        peerDetails[call.peer]?.avatar || "https://via.placeholder.com/20"
+      );
     });
+    call.on("close", () => removeUserFromVoiceUI(call.peer));
+  } else {
+    // Ignore the call if not in the voice channel
+    call.close();
+  }
 });
 
 export function addUserToVoiceUI(id, username, avatar) {
@@ -141,9 +142,16 @@ document.getElementById("share-screen").onclick = async () => {
 export function leaveVoiceChannel() {
   for (let id in mediaConnections) {
     mediaConnections[id].close();
+    delete mediaConnections[id];
   }
   if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
+    localStream.getTracks().forEach((track) => track.stop());
+  }
+  if (localVideoStream) {
+    localVideoStream.getTracks().forEach((track) => track.stop());
+  }
+  if (localScreenStream) {
+    localScreenStream.getTracks().forEach((track) => track.stop());
   }
   setLocalStream(null);
   setMicEnabled(true);
@@ -156,8 +164,8 @@ export function leaveVoiceChannel() {
 
   document.getElementById("voice-users").innerHTML = "";
 }
-document.getElementById("leave-voice").onclick = leaveVoiceChannel;
 
+document.getElementById("leave-voice").onclick = leaveVoiceChannel;
 
 function replaceTracks(newVideoTrack) {
   Object.values(mediaConnections).forEach((call) => {
