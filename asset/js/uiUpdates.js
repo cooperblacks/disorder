@@ -7,6 +7,7 @@ import {
   peerDetails,
   localUsername,
   messageInput,
+  replyingTo,
   setReplyingTo,
 } from "./globals.js";
 
