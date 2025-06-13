@@ -8,8 +8,8 @@ import {
   localAvatar,
   replyingTo,
 } from "./globals.js";
-import { broadcast, displayMessage } from "./messaging.js";
-import { appendSystemMessage, updatePeerSidebar } from "./uiUpdates.js";
+import { broadcast  } from "./messaging.js";
+import { appendSystemMessage, updatePeerSidebar, displayMessage } from "./uiUpdates.js";
 
 [fileInput, plusFileInput].forEach((input) => {
   input.addEventListener("change", () => {
