@@ -1,9 +1,14 @@
 # disorder
-Anonymous peer-to-peer chat and file sharing platform with no database.
+Anonymous peer-to-peer chat and file sharing platform with **no** database, **no** persistent storage and **no** server. Everything can be hosted as a static site, yet work dynamically. So much privacy that even the developers have no control over the data or userbase.
+
+Currently, the latest version looks like this:
+
+![](/asset/img/screenshot_v0.2.png)
 
 ## Current Team
 - [Abrar A.](#), core chatting functionality
 - [Cooper B.](#), UI/UX designer and engineer
+- [muxto](#), QA and marketing
 
 Thanks to the following resources:
 - [PeerJS](https://peerjs.com/), for the serverless P2P logic handling
