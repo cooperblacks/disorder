@@ -82,7 +82,7 @@ peer.on("call", (call) => {
 });
 
 export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, isScreenShare) {
-// add user avatars below voice channel
+  // Add user avatars below voice channel
   if (document.getElementById(`voice-user-${peerId}`)) return;
   const voiceUsers = document.getElementById("voice-users");
   const div = document.createElement("div");
@@ -90,20 +90,24 @@ export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, i
   div.className = "voice-user";
   div.innerHTML = `<img src="${avatarUrl}" alt="${username}"><span>${username}</span>`;
   voiceUsers.appendChild(div);
-  
+
+  // Create container for top panel (avatar + visualizer)
   const container = document.createElement('div');
-  container.id = `voice-user-${peerId}`;
+  container.id = `voice-user-container-${peerId}`; // Unique ID to avoid conflicts
   container.className = "relative flex items-center justify-center w-24 h-24";
 
+  // Create canvas for audio visualizer
   const canvas = document.createElement('canvas');
-  canvas.width = 80;
-  canvas.height = 80;
-  canvas.className = "absolute top-0 left-0 z-0";
+  canvas.width = 96; // Slightly larger than avatar to allow ring expansion
+  canvas.height = 96;
+  canvas.className = "absolute z-0"; // No need for top-0 left-0; centering handled by flex
 
+  // Create avatar
   const avatar = document.createElement('img');
   avatar.src = avatarUrl || '/default-avatar.png';
   avatar.className = "rounded-full w-16 h-16 z-10";
-  
+
+  // Append elements to container
   container.append(canvas, avatar);
   document.getElementById("voice-top-panel").appendChild(container);
   document.getElementById("voice-top-panel").classList.remove('hidden');
@@ -139,18 +143,21 @@ export function setupAudioVisualizer(stream, canvas) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
   const ctx = canvas.getContext('2d');
-  const radiusBase = 20;
+  const avatarRadius = 32; // Half of avatar's 64px (w-16 h-16)
+  const baseRadius = avatarRadius + 4; // Start just outside avatar edge
+  const maxScale = 1.5; // Limit how far the ring expands
+
   const draw = () => {
     requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArray);
     const amplitude = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    const scale = Math.min(Math.max(amplitude / 10, 1), 3);
+    const scale = Math.min(Math.max(amplitude / 50, 1), maxScale); // Adjust sensitivity
 
-    const center = canvas.width / 2;
+    const center = canvas.width / 2; // Canvas is 96x96, so center is 48
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.beginPath();
-    ctx.arc(center, center, radiusBase * scale, 0, 2 * Math.PI);
+    ctx.arc(center, center, baseRadius * scale, 0, 2 * Math.PI);
     ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
     ctx.lineWidth = 4;
     ctx.stroke();
