@@ -38,11 +38,14 @@ export function joinVoiceChannel() {
         if (!mediaConnections[id]) {
           const call = peer.call(id, stream);
           mediaConnections[id] = call;
-          call.on("stream", (remoteStream) => {
+         call.on("stream", (remoteStream) => {
             addUserToVoiceUI(
               call.peer,
               peerDetails[call.peer]?.username || "Unknown",
-              peerDetails[call.peer]?.avatar || "https://via.placeholder.com/20"
+              peerDetails[call.peer]?.avatar || "https://via.placeholder.com/20",
+              remoteStream,
+              false, // isVideo
+              false  // isScreenShare
             );
           });
           call.on("close", () => removeUserFromVoiceUI(call.peer));
