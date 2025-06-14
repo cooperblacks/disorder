@@ -18,7 +18,7 @@ import {
   setMicEnabled,
 } from "./globals.js";
 
-import { setupAudioVisualizer } from './utils/audioVisualizer.js';
+import { setupAudioVisualizer } from './utils/audioInputVisualizer.js';
 
 function showError(message) {
   const errorBox = document.getElementById("error-message");
