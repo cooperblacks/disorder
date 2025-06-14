@@ -18,8 +18,6 @@ import {
   setMicEnabled,
 } from "./globals.js";
 
-import { setupAudioVisualizer } from './audioInputVisualizer.js';
-
 function showError(message) {
   const errorBox = document.getElementById("error-message");
   const errorText = document.getElementById("error-text");
@@ -76,7 +74,7 @@ peer.on("call", (call) => {
   }
 });
 
-export function addUserToVoiceUI(peerId, stream, username, avatarUrl, isVideo, isScreenShare) {
+export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, isScreenShare) {
   const container = document.createElement('div');
   container.id = `voice-user-${peerId}`;
   container.className = "relative flex items-center justify-center w-24 h-24";
@@ -112,6 +110,37 @@ export function addUserToVoiceUI(peerId, stream, username, avatarUrl, isVideo, i
 export function removeUserFromVoiceUI(id) {
   const el = document.getElementById(`voice-user-${id}`);
   if (el) el.remove();
+}
+
+export function setupAudioVisualizer(stream, canvas) {
+  const audioCtx = new AudioContext();
+  const analyser = audioCtx.createAnalyser();
+  const source = audioCtx.createMediaStreamSource(stream);
+
+  analyser.fftSize = 256;
+  source.connect(analyser);
+
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  const ctx = canvas.getContext('2d');
+  const radiusBase = 20;
+  const draw = () => {
+    requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+    const amplitude = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+    const scale = Math.min(Math.max(amplitude / 10, 1), 3);
+
+    const center = canvas.width / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(center, center, radiusBase * scale, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  };
+
+  draw();
 }
 
 document.getElementById("toggle-mic").onclick = () => {
