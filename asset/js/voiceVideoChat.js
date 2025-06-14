@@ -18,6 +18,8 @@ import {
   setMicEnabled,
 } from "./globals.js";
 
+import { setupAudioVisualizer } from './utils/audioVisualizer.js';
+
 function showError(message) {
   const errorBox = document.getElementById("error-message");
   const errorText = document.getElementById("error-text");
@@ -74,14 +76,37 @@ peer.on("call", (call) => {
   }
 });
 
-export function addUserToVoiceUI(id, username, avatar) {
-  if (document.getElementById(`voice-user-${id}`)) return;
-  const voiceUsers = document.getElementById("voice-users");
-  const div = document.createElement("div");
-  div.id = `voice-user-${id}`;
-  div.className = "voice-user";
-  div.innerHTML = `<img src="${avatar}" alt="${username}"><span>${username}</span>`;
-  voiceUsers.appendChild(div);
+export function addUserToVoiceUI(peerId, stream, username, avatarUrl, isVideo, isScreenShare) {
+  const container = document.createElement('div');
+  container.id = `voice-user-${peerId}`;
+  container.className = "relative flex items-center justify-center w-24 h-24";
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 80;
+  canvas.height = 80;
+  canvas.className = "absolute top-0 left-0 z-0";
+
+  const avatar = document.createElement('img');
+  avatar.src = avatarUrl || '/default-avatar.png';
+  avatar.className = "rounded-full w-16 h-16 z-10";
+  
+  container.append(canvas, avatar);
+  document.getElementById("voice-top-panel").appendChild(container);
+  document.getElementById("voice-top-panel").classList.remove('hidden');
+
+  // If not video/screen share, show avatar + ring
+  if (!isVideo && !isScreenShare) {
+    setupAudioVisualizer(stream, canvas);
+  } else {
+    // Replace avatar with video or screen
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.className = "rounded w-full h-full object-cover";
+    container.innerHTML = ''; // Clear canvas + avatar
+    container.appendChild(video);
+  }
 }
 
 export function removeUserFromVoiceUI(id) {
