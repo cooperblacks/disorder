@@ -91,6 +91,9 @@ export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, i
   div.innerHTML = `<img src="${avatarUrl}" alt="${username}"><span>${username}</span>`;
   voiceUsers.appendChild(div);
 
+  // Check for existing container in voice-top-panel to prevent duplicates
+  if (document.getElementById(`voice-user-container-${peerId}`)) return;
+
   // Create container for top panel (avatar + visualizer)
   const container = document.createElement('div');
   container.id = `voice-user-container-${peerId}`; // Unique ID to avoid conflicts
@@ -100,7 +103,7 @@ export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, i
   const canvas = document.createElement('canvas');
   canvas.width = 96; // Slightly larger than avatar to allow ring expansion
   canvas.height = 96;
-  canvas.className = "absolute z-0"; // No need for top-0 left-0; centering handled by flex
+  canvas.className = "absolute z-0"; // Centering handled by flex
 
   // Create avatar
   const avatar = document.createElement('img');
@@ -128,8 +131,13 @@ export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, i
 }
 
 export function removeUserFromVoiceUI(id) {
-  const el = document.getElementById(`voice-user-${id}`);
-  if (el) el.remove();
+  // Remove from voice-users list (below voice channel)
+  const voiceUserEl = document.getElementById(`voice-user-${id}`);
+  if (voiceUserEl) voiceUserEl.remove();
+
+  // Remove from voice-top-panel (avatar + visualizer)
+  const voiceTopPanelEl = document.getElementById(`voice-user-container-${id}`);
+  if (voiceTopPanelEl) voiceTopPanelEl.remove();
 }
 
 export function setupAudioVisualizer(stream, canvas) {
