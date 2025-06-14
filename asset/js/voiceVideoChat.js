@@ -82,6 +82,15 @@ peer.on("call", (call) => {
 });
 
 export function addUserToVoiceUI(peerId, username, avatarUrl, stream, isVideo, isScreenShare) {
+// add user avatars below voice channel
+  if (document.getElementById(`voice-user-${peerId}`)) return;
+  const voiceUsers = document.getElementById("voice-users");
+  const div = document.createElement("div");
+  div.id = `voice-user-${peerId}`;
+  div.className = "voice-user";
+  div.innerHTML = `<img src="${avatarUrl}" alt="${username}"><span>${username}</span>`;
+  voiceUsers.appendChild(div);
+  
   const container = document.createElement('div');
   container.id = `voice-user-${peerId}`;
   container.className = "relative flex items-center justify-center w-24 h-24";
